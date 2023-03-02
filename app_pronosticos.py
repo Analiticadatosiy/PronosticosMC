@@ -1444,7 +1444,7 @@ def Holt_Winters():
 
 st.title("Pronósticos Motocicletas - Incolmotos Yamaha")
 
-st.sidebar.image("https://raw.githubusercontent.com/Analiticadatosiy/Pronosticos/master/YAMAHA.PNG?token=ATEVFY6JYIBS3BZZKNKD5ADAWVFBY", width=250)
+st.sidebar.image("https://raw.githubusercontent.com/Analiticadatosiy/Pronosticos_MC/master/YAMAHA.PNG?token=ATEVFY6JYIBS3BZZKNKD5ADAWVFBY", width=250)
 # img = Image.open(get_file_content_as_string("YAMAHA.PNG"))
 # st.sidebar.image(img, width=250)
 
@@ -1506,7 +1506,7 @@ if status == "Informarse":
             """
   st.markdown(text)
   # Cálculo del MAE (Imagen)
-  st.image("https://raw.githubusercontent.com/Analiticadatosiy/Pronosticos/master/MAE.JPG?token=ATEVFY3U2WJFFMHXGNGTU73AWVFF4", width=200)
+  st.image("https://raw.githubusercontent.com/Analiticadatosiy/Pronosticos_MC/master/MAE.JPG?token=ATEVFY3U2WJFFMHXGNGTU73AWVFF4", width=200)
   # img_MAE = Image.open("MAE.jpg")
 
   # Explicación del MAPE
@@ -1515,7 +1515,7 @@ if status == "Informarse":
             """
   st.markdown(text)
   # Cálculo del MAPE (Imagen)
-  st.image("https://raw.githubusercontent.com/Analiticadatosiy/Pronosticos/master/MAPE.JPG?token=ATEVFYZAOBQ5DZK5LAYIKKTAWVFII", width=200)
+  st.image("https://raw.githubusercontent.com/Analiticadatosiy/Pronosticos_MC/master/MAPE.JPG?token=ATEVFYZAOBQ5DZK5LAYIKKTAWVFII", width=200)
   # img_MAPE= Image.open("MAPE.jpg")
 
   st.markdown('Sin embargo, es importante entender que muchas veces el error puede estar inducido por factores externos que condicionan el valor real; por ejemplo, si en un mes se pronostica vender 3.000 motocicletas pero no tenemos inventario y sólo vendemos 1.500, esto impactará mucho al error porque el pronostico se alejó mucho de la realidad. Por tanto, se sugiere realizar un análisis de los valores pronosticados, así como de los errores calculados, de cara a los datos usados para hacer el pronóstico.')
