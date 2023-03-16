@@ -1444,7 +1444,7 @@ def Holt_Winters():
 
 st.title("Pronósticos Motocicletas - Incolmotos Yamaha")
 
-st.sidebar.image("https://raw.githubusercontent.com/Analiticadatosiy/Pronosticos/master/YAMAHA.PNG?token=ATEVFY6JYIBS3BZZKNKD5ADAWVFBY", width=250)
+st.sidebar.image("https://raw.githubusercontent.com/Analiticadatosiy/Pronosticos_MC/master/YAMAHA.PNG?token=ATEVFY6JYIBS3BZZKNKD5ADAWVFBY", width=250)
 # img = Image.open(get_file_content_as_string("YAMAHA.PNG"))
 # st.sidebar.image(img, width=250)
 
