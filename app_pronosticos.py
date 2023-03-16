@@ -1,25 +1,5 @@
 # Se importan las librerías necesarias
 
-import streamlit as st
-import joblib
-from PIL import Image
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
-import tensorflow as tf
-from tensorflow import keras
-from statsmodels.tsa.holtwinters import ExponentialSmoothing as HWES
-from sklearn.metrics import mean_squared_error, r2_score, mean_absolute_error, mean_absolute_percentage_error
-from sklearn import preprocessing
-from sklearn.preprocessing import MinMaxScaler
-import base64
-import plotly.express as px
-from dateutil.relativedelta import relativedelta
-import datetime
-import time
-import streamlit as st
-import joblib
-from PIL import Image
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -35,6 +15,9 @@ from dateutil.relativedelta import relativedelta
 import datetime
 from datetime import datetime as dt
 import time
+import streamlit as st
+import joblib
+from PIL import Image
 
 # Se configuran los atributos de estilo de la app
 st.set_page_config(
@@ -45,13 +28,13 @@ st.set_page_config(
 )
 
 # Se importa el dataframe
-df_runt_total = pd.read_excel('BD_Actualizada_Ene2023.xlsx', sheet_name='RUNT_Total', converters={'TRM': int, 'SMMLV&AUXTTE': int, 'DIAS HABILES': int, 'FESTIVOS': int, 'RUNT MERCADO': int, 'RUNT YAMAHA': int}) #***
-#df_runt_categoria_yamaha = pd.read_excel('BD_Actualizada_Ene2023.xlsx', sheet_name='RUNT_Categoria_Yamaha') #***
-df_runt_modelo_yamaha = pd.read_excel('BD_Actualizada_Ene2023.xlsx', sheet_name='RUNT_Modelo_Yamaha', converters={'TRM': int, 'SMMLV&AUXTTE': int, 'DIAS HABILES': int, 'FESTIVOS': int, 'RUNT MERCADO': int, 'RUNT YAMAHA': int,
+df_runt_total = pd.read_excel('BD_Actualizada_Feb2023.xlsx', sheet_name='RUNT_Total', converters={'TRM': int, 'SMMLV&AUXTTE': int, 'DIAS HABILES': int, 'FESTIVOS': int, 'RUNT MERCADO': int, 'RUNT YAMAHA': int}) #***
+#df_runt_categoria_yamaha = pd.read_excel('BD_Actualizada_Feb2023.xlsx', sheet_name='RUNT_Categoria_Yamaha') #***
+df_runt_modelo_yamaha = pd.read_excel('BD_Actualizada_Feb2023.xlsx', sheet_name='RUNT_Modelo_Yamaha', converters={'TRM': int, 'SMMLV&AUXTTE': int, 'DIAS HABILES': int, 'FESTIVOS': int, 'RUNT MERCADO': int, 'RUNT YAMAHA': int,
                                       'RUNT NMAX': int, 'RUNT NMAX CONNECTED': int, 'RUNT CRYPTON FI': int, 'RUNT XTZ125': int, 'RUNT XTZ150': int, 'RUNT XTZ250': int, 'RUNT MT03': int, 'RUNT FZ25': int, 'RUNT FZ15': int,
                                       'RUNT SZ15RR': int, 'RUNT YBRZ125': int, 'RUNT YCZ110': int, 'RUNT XMAX': int}) #***
-#df_runt_marca_mercado = pd.read_excel('BD_Actualizada_Ene2023.xlsx', sheet_name='RUNT_Marca_Mercado') #***
-#df_runt_categoria_mercado = pd.read_excel('BD_Actualizada_Ene2023.xlsx', sheet_name='RUNT_Categoria_Mercado') #***
+#df_runt_marca_mercado = pd.read_excel('BD_Actualizada_Feb2023.xlsx', sheet_name='RUNT_Marca_Mercado') #***
+#df_runt_categoria_mercado = pd.read_excel('BD_Actualizada_Feb2023.xlsx', sheet_name='RUNT_Categoria_Mercado') #***
 
 # La siguiente función de escalamiento es transversal a todos los pronósticos que se deriven de redes neuronales:
 def preprocesamientoRN(df):
@@ -65,7 +48,7 @@ def preprocesamientoRN(df):
   Y_scale = min_max_scaler.fit_transform(Y)
   return min_max_scaler, X_scale, Y_scale
 
-# La siguiente función es transversal a todos los modelos; permite extraer el target de interés.
+  # La siguiente función es transversal a todos los modelos; permite extraer el target de interés.
 def target(dataframe, lista): # lista contiene el nombre de las columnas que son target
   df = dataframe.dropna();
   df_target = pd.DataFrame(columns=lista)
@@ -260,8 +243,8 @@ def actual_individual(selectbox1, selectbox4): # Predicción de un sólo mes. Es
       # Se preparan los datos para entrenar los modelos
       # Se agrega una nueva fila al arreglo numpy1 con los valores de las variables que ingresó el usuario por teclado.
       X = np.array([[DESEMPLEO, INFLACION, TRM, SMMLV_AUXTTE, IEC, ICE, PRECIO_PETROLEO_WTI, (DIAS_HABILES) / (DIAS_HABILES + FESTIVOS)]])
-      # Se asigna un valor semilla (igual a 50000) a la variable RUNT MERCADO.
-      X_RN = np.concatenate([numpy1, np.reshape(np.append(X, [50000]), (1, -1))])  # OJO: NO ME CUADRA ESTE DATO
+      # Se asigna un valor semilla (igual a 40000) a la variable RUNT MERCADO.
+      X_RN = np.concatenate([numpy1, np.reshape(np.append(X, [40000]), (1, -1))])  # OJO: NO ME CUADRA ESTE DATO
 
       # Redes Neuronales
       # Se escalan los datos con la función preprocesamientoRN que fue definida en las primeras líneas de código
@@ -355,10 +338,13 @@ def actual_lote(selectbox1, selectbox4): # Predicción de varios meses. Esta fun
       columns = df_p.shape[1]
       # Se crea la columna RATIO_DH_F
       df_p.iloc[:, columns - 2] = df_p.iloc[:, columns - 2] / (df_p.iloc[:, columns - 2] + df_p.iloc[:, columns - 1])
+      df_p.rename(columns={'DIAS HABILES': 'RATIO_DH_F'}, inplace=True)
 
       # Se rellena la última columna RUNT YAMAHA con el valor semilla de 8000, para los meses de pronóstico ingresados por el usuario.
       for i in range(0, df_p.shape[0], 1):
         df_p.iloc[i, columns - 1] = 8000 #AJUSTAR ESTE VALOR
+
+      df_p.rename(columns={'FESTIVOS': visualizar}, inplace=True)
 
       # Se cargan los 3 modelos de pronóstico: Redes Neuronales, Random Forest y XGBoost
       # que fueron guardados por generador_modelos_definitivo.py en formatos h5 y pkl, respectivamente, en la misma carpeta del proyecto.
@@ -371,7 +357,7 @@ def actual_lote(selectbox1, selectbox4): # Predicción de varios meses. Esta fun
       X = df_p.values
       X_RN = np.concatenate([numpy1, X])
 
-      # Para los modelos RF y XG: Se elimina la última columna de df_p, con los valores imputados en 8000/50000 para RUNT YAMAHA/MERCADO
+      # Para los modelos RF y XG: Se elimina la última columna de df_p, con los valores imputados en 8000/40000 para RUNT YAMAHA/MERCADO
       X = X[:, 0: df_p.shape[1] - 1]
 
       # Redes Neuronales
@@ -478,10 +464,13 @@ def actual_lote(selectbox1, selectbox4): # Predicción de varios meses. Esta fun
       columns = df_p.shape[1]
       # Se crea la columna RATIO_DH_F
       df_p.iloc[:, columns - 2] = df_p.iloc[:, columns - 2] / (df_p.iloc[:, columns - 2] + df_p.iloc[:, columns - 1])
+      df_p.rename(columns={'DIAS HABILES': 'RATIO_DH_F'}, inplace=True)
 
-      # Se rellena la última columna RUNT MERCADO con el valor semilla de 50000, para los meses de pronóstico ingresados por el usuario.
+      # Se rellena la última columna RUNT MERCADO con el valor semilla de 40000, para los meses de pronóstico ingresados por el usuario.
       for i in range(0, df_p.shape[0], 1):
-        df_p.iloc[i, columns - 1] = 50000
+        df_p.iloc[i, columns - 1] = 40000
+
+      df_p.rename(columns={'FESTIVOS': visualizar}, inplace=True)
 
       # Se cargan los 3 modelos de pronóstico: Redes Neuronales, Random Forest y XGBoost
       # que fueron guardados por generador_modelos_definitivo.py en formatos h5 y pkl, respectivamente, en la misma carpeta del proyecto.
@@ -493,7 +482,7 @@ def actual_lote(selectbox1, selectbox4): # Predicción de varios meses. Esta fun
       X = df_p.values
       X_RN = np.concatenate([numpy1, X])
 
-      # Para los modelos RF y XG: Se elimina la última columna de df_p, con los valores imputados en 50000 para RUNT MERCADO
+      # Para los modelos RF y XG: Se elimina la última columna de df_p, con los valores imputados en 40000 para RUNT MERCADO
       X = X[:, 0: df_p.shape[1] - 1]
 
       # Redes Neuronales
@@ -564,6 +553,7 @@ def actual_lote(selectbox1, selectbox4): # Predicción de varios meses. Esta fun
 # Demanda: Yamaha o Mercado
 # Dinámica: Con datos reales del último año
 # Alcance: Predicción de un solo mes (rezago_yamaha o rezago_mercado) ó Predicción de varios meses (rezago_yamaha_lote o rezago_mercado_lote)
+
 # Esta limpieza se aplica en las funciones: rezago_yamaha y rezago_yamaha_lote, y, rezago_mercado y rezago_mercado_lote
 
 def limpieza_rezago(df, *args):
@@ -592,14 +582,14 @@ def rezago_yamaha(): # Predicción de un solo mes
     # Se crea el subtítulo
     st.subheader('Estimar demanda con datos reales del último año: ' + selectbox1 + ' - ' + selectbox4 + '.')
     # Se dan instrucciones (por pantalla) al usuario sobre los datos que debe ingresar y su formato
-    st.write('Por favor, ingrese el dato de las variables un año atras del período que desea estimar, es decir, si desea estimar Junio de 2021, ingrese los datos de Junio de 2020 (para el caso de los días hábiles y festivos, sí se deben ingresar los valores reales para el mes que se desea pronosticar)')
-    st.write('Tome como guía los valores y formatos de la tabla que se muestra a continuación.')
+    st.write('Esta aplicación tomará los datos de las variables un año atras del período que se desea estimar, para calcular el(los) pronóstico(s); es decir, si se requiere estimar Junio de 2023, se tendrán en cuenta los datos de Junio de 2022. Para el caso de los días hábiles y festivos, deberá ingresar los valores reales para el mes que desee pronosticar.')
+    #st.write('Tome como guía los valores y formatos de la tabla que se muestra a continuación.')
 
     # Se realiza la limpieza del dataset original
     dataset1, numpy1, dataset2 = limpieza_rezago(df_runt_total, 'RUNT MERCADO', 'RUNT YAMAHA')
 
     # Se imprimen en pantalla los últimos 6 registros del dataset limpio
-    #dataset2.index = dataset2.index.strftime('%d/%m/%Y')
+    dataset2.index = dataset2.index.date
     st.write(dataset2.tail(6))
 
     # Se capturan el año y mes de pronóstico que el usuario ingresa, y se incluye el rezago.
@@ -631,9 +621,9 @@ def rezago_yamaha(): # Predicción de un solo mes
       # Se preparan los datos para entrenar los modelos
       # Se agrega una nueva fila al arreglo numpy1 con los valores de las variables que ingresó el usuario por teclado.
       X = np.array([[DESEMPLEO, INFLACION, TRM, SMMLV_AUXTTE, PRECIO_PETROLEO_WTI, (DIAS_HABILES)/(DIAS_HABILES+FESTIVOS), RUNT_MERCADO]])
-      # Se asigna un valor semilla (igual a 7000) a la variable RUNT YAMAHA.
-      #X_RN = np.concatenate([numpy1, np.reshape(np.append(X, [7000]), (1, -1))])
-      X_RN = np.array([[DESEMPLEO, INFLACION, TRM, SMMLV_AUXTTE, PRECIO_PETROLEO_WTI, (DIAS_HABILES) / (DIAS_HABILES + FESTIVOS), RUNT_MERCADO, np.reshape(7000, (1, -1))]])
+      # Se asigna un valor semilla (igual a 8000) a la variable RUNT YAMAHA.
+      #X_RN = np.concatenate([numpy1, np.reshape(np.append(X, [8000]), (1, -1))])
+      X_RN = np.array([[DESEMPLEO, INFLACION, TRM, SMMLV_AUXTTE, PRECIO_PETROLEO_WTI, (DIAS_HABILES) / (DIAS_HABILES + FESTIVOS), RUNT_MERCADO, np.reshape(8000, (1, -1))]])
 
       # Redes Neuronales
       # Se escalan los datos con la función preprocesamientoRN que fue definida en las primeras líneas de código
@@ -720,22 +710,25 @@ def rezago_yamaha_lote(): # Predicción de varios meses
 
     # Se imprimen en pantalla los últimos 6 registros del dataset limpio
     #dataset2.index = dataset2.index.strftime('%d/%m/%Y')
+    dataset2.index = dataset2.index.date
     st.write(dataset2.tail(6))
 
-    df_p = df_runt_total.loc[(df_runt_total['FECHA'] > date_ini) & (df_runt_total['FECHA'] <= date_act)]
-    df_p = df_p.iloc[:, [0, 1, 2, 3, 4, 6, 8, 9, 10]].dropna() # No se incluye la columna 21: RUNT YAMAHA y, de los indicadores económicos, se conserva sólo IEC.
+    df_p = df_runt_total.loc[(df_runt_total['FECHA'] >= date_ini) & (df_runt_total['FECHA'] <= date_act)]
+    df_p = df_p.iloc[:, [0, 1, 2, 3, 4, 6, 8, 9, 10, 12]].dropna() # De los indicadores económicos, se conserva sólo IEC. Antes no se incluía la columna 12: RUNT YAMAHA; se asignaba un valor semilla de 8000.
 
     index_pron = df_p['FECHA'] # Se almacena la columna Fecha, en la nueva variable index_pron, con la fecha correspondiente a cada fila de pronóstico.
+    index_pron = index_pron.apply(lambda x: (x + relativedelta(months=+12)).strftime('%Y-%m-%d'))
+
     df_p = df_p.drop(['FECHA'], axis=1) # Se elimina la columna Fecha
     df_p.iloc[:, 6] = df_p.iloc[:, 6] / (df_p.iloc[:, 6] + df_p.iloc[:, 7]) # Se crea la nueva columna RATIO_DH_F
     df_p.rename(columns = {'DIAS HABILES': 'RATIO_DH_F'}, inplace = True) # Se cambia el nombre de la nueva columna
     df_p = df_p.drop(['FESTIVOS'], axis=1) # Se elimina la columna Festivos
     #st.write(df_p)
 
-    # Se rellena la última columna RUNT YAMAHA con el valor semilla de 7000, para los meses de rezago ingresados por el usuario.
-    vector = pd.DataFrame((np.ones((df_p.shape[0], 1), dtype=int)) * (7000))
+    # Se rellena la última columna RUNT YAMAHA con el valor semilla de 8000, para los meses de rezago ingresados por el usuario.
+    #vector = pd.DataFrame((np.ones((df_p.shape[0], 1), dtype=int)) * (8000)) # Se comentó esta línea
     #st.write(vector)
-    df_p.insert(len(df_p.columns), 'YAMAHA SEED', vector.values)
+    #df_p.insert(len(df_p.columns), 'YAMAHA_SEED', vector.values) # Se comentó esta línea
     #st.write(df_p)
 
     # Se cargan los 3 modelos de pronóstico: Redes Neuronales, Random Forest y XGBoost que fueron guardados
@@ -748,7 +741,7 @@ def rezago_yamaha_lote(): # Predicción de varios meses
     X = df_p.values
     X_RN = np.concatenate([numpy1, X])  # Para RN
 
-    # Para los modelos RF y XG: Se elimina la última columna de df_p, con los valores imputados en 7000 para RUNT YAMAHA.
+    # Para los modelos RF y XG: Se elimina la última columna de df_p, con los valores imputados en 8000 para RUNT YAMAHA.
     X = X[:, 0: df_p.shape[1] - 1]  # Para RF y XG
 
     # Redes Neuronales
@@ -775,7 +768,7 @@ def rezago_yamaha_lote(): # Predicción de varios meses
     st.write('**Pronóstico**')
     resultados = pd.DataFrame({'Fecha': index_pron, 'Redes Neuronales': np.around(y_hat_RN), 'Random Forest': np.around(y_hat_RF), 'XGBoost': np.around(y_hat_XG), 'Promedio': np.around(y_hat_prom)})
     resultados = resultados.astype({'Redes Neuronales': int, 'Random Forest': int, 'XGBoost': int, 'Promedio': int})
-    resultados['Fecha'] = resultados['Fecha'].apply(lambda x: (x + relativedelta(months=+12)).strftime('%d/%m/%Y'))
+    #resultados['Fecha'] = resultados['Fecha'].apply(lambda x: (x + relativedelta(months=+12)).strftime('%Y-%m-%d'))
     resultados.set_index('Fecha', inplace=True)
     resultados.to_excel('pronosticos.xlsx', index=True)
 
@@ -819,21 +812,22 @@ def rezago_yamaha_lote(): # Predicción de varios meses
 # A continuación, se definen las funciones de pronóstico para RUNT Mercado, con datos reales del último año,
 # con predicción de un sólo mes: rezago_mercado y con predicción de varios meses: rezago_mercado_lote.
 
-def rezago_mercado():
+def rezago_mercado(): # Predicción de un solo mes
 
   if selectbox1 == 'Mercado': # Los nombres de las variables que se recibirán por el menú '¿Qué demanda desea estimar?' de Streamlit.
 
     # Se crea el subtítulo
     st.subheader('Estimar demanda con datos reales del último año: ' + selectbox1 + '.')
     # Se dan instrucciones (por pantalla) al usuario sobre los datos que debe ingresar y su formato
-    st.write('Por favor, ingrese el dato de las variables un año atras del período que desea estimar, es decir, si desea estimar Junio de 2021, ingrese los datos de Junio de 2020 (para el caso de los días hábiles y festivos, sí se deben ingresar los valores reales para el mes que se desea pronosticar)')
-    st.write('Tome como guía los valores y formatos de la tabla que se muestra a continuación.')
+    st.write('Esta aplicación tomará los datos de las variables un año atras del período que se desea estimar, para calcular el(los) pronóstico(s); es decir, si se requiere estimar Junio de 2023, se tendrán en cuenta los datos de Junio de 2022. Para el caso de los días hábiles y festivos, deberá ingresar los valores reales para el mes que desee pronosticar.')
+    #st.write('Tome como guía los valores y formatos de la tabla que se muestra a continuación.')
 
     # Se realiza la limpieza del dataset original
     dataset1, numpy1, dataset2 = limpieza_rezago(df_runt_total, 'RUNT MERCADO')
 
     # Se imprimen en pantalla los últimos 6 registros del dataset limpio
     #dataset2.index = dataset2.index.strftime('%d/%m/%Y')
+    dataset2.index = dataset2.index.date
     st.write(dataset2.tail(6))
 
     # Se capturan el año y mes de pronóstico que el usuario ingresa, y se incluye el rezago.
@@ -865,23 +859,23 @@ def rezago_mercado():
       # Se agrega una nueva fila al arreglo numpy1 con los valores de las variables que ingresó el usuario por teclado.
       X = np.array([[DESEMPLEO, INFLACION, TRM, SMMLV_AUXTTE, PRECIO_PETROLEO_WTI, (DIAS_HABILES) / (DIAS_HABILES + FESTIVOS), RUNT_MERCADO]])
       #st.write(X)
-      # # Se asigna un valor semilla (igual a 7000) a la variable RUNT YAMAHA.
-      X_RN = np.concatenate([numpy1, np.reshape(np.append(X, [7000]), (1, -1))])
+      # # Se asigna un valor semilla (igual a 40000) a la variable RUNT MERCADO.
+      X_RN = np.concatenate([numpy1, np.reshape(np.append(X, [40000]), (1, -1))])
 
       # Redes Neuronales
       # Se escalan los datos con la función preprocesamientoRN que fue definida en las primeras líneas de código
       scaler, X_scale, Y_scale = preprocesamientoRN(X_RN)
-      # Se almacena, en la nueva variable y_hat_scale, el valor predicho para RUNT YAMAHA
+      # Se almacena, en la nueva variable y_hat_scale, el valor predicho para RUNT MERCADO
       y_hat_scale = modeloRN_r_mercado.predict(np.reshape(X_scale[-1], (1, -1)))
       # Se regresa a la escala original el valor predicho para RUNT YAMAHA
       y_hat_RN = scaler.inverse_transform(y_hat_scale).ravel()
 
       # Random Forest
-      # Se almacena, en la variable y_hat_RF, el valor predicho (por el modelo Random Forest) para RUNT YAMAHA.
+      # Se almacena, en la variable y_hat_RF, el valor predicho (por el modelo Random Forest) para RUNT MERCADO.
       y_hat_RF = modeloRF_r_mercado.predict(X)
 
       # XGBoost
-      # Se almacena, en la variable y_hat_XG, el valor predicho (por el modelo XGBoost) para RUNT YAMAHA.
+      # Se almacena, en la variable y_hat_XG, el valor predicho (por el modelo XGBoost) para RUNT MERCADO.
       y_hat_XG = modeloXG_r_mercado.predict(X)
 
       # Promedio
@@ -951,21 +945,24 @@ def rezago_mercado_lote(): # Predicción de varios meses. Esta función le solic
 
     # Se imprimen en pantalla los últimos 6 registros del dataset limpio
     #dataset2.index = dataset2.index.strftime('%d/%m/%Y')
+    dataset2.index = dataset2.index.date
     st.write(dataset2.tail(6))
 
-    df_p = df_runt_total.loc[(df_runt_total['FECHA'] > date_ini) & (df_runt_total['FECHA'] <= date_act)]
-    df_p = df_p.iloc[:, [0, 1, 2, 3, 4, 6, 8, 9, 10]].dropna() # No se incluye la columna 20 = RUNT MERCADO y, de los indicadores económicos, se conserva sólo IEC.
+    df_p = df_runt_total.loc[(df_runt_total['FECHA'] >= date_ini) & (df_runt_total['FECHA'] <= date_act)]
+    df_p = df_p.iloc[:, [0, 1, 2, 3, 4, 6, 8, 9, 10, 11]].dropna() # De los indicadores económicos, se conserva sólo IEC. No se incluía la columna 11 = RUNT MERCADO; se asignaba un valor semilla de 40000.
 
     index_pron = df_p['FECHA'] # Se almacena la columna Fecha, en la nueva variable index_pron, con la fecha correspondiente a cada fila de pronóstico.
+    index_pron = index_pron.apply(lambda x: (x + relativedelta(months=+12)).strftime('%Y-%m-%d'))
+
     df_p = df_p.drop(['FECHA'], axis=1) # Se elimina la columna Fecha
     df_p.iloc[:, 6] = df_p.iloc[:, 6] / (df_p.iloc[:, 6] + df_p.iloc[:, 7]) # Se crea la nueva columna RATIO_DH_F
     df_p.rename(columns = {'DIAS HABILES': 'RATIO_DH_F'}, inplace = True) # Se cambia el nombre de la nueva columna
     df_p = df_p.drop(['FESTIVOS'], axis=1) # Se elimina la columna Festivos
     #st.write(df_p)
 
-    # Se rellena la última columna RUNT MERCADO con el valor semilla de 7000, para los meses de rezago ingresados por el usuario.
-    vector = pd.DataFrame((np.ones((df_p.shape[0], 1), dtype=int)) * (7000))
-    df_p.insert(len(df_p.columns), 'YAMAHA SEED', vector.values)
+    # Se rellena la última columna RUNT MERCADO con el valor semilla de 40000, para los meses de rezago ingresados por el usuario.
+    #vector = pd.DataFrame((np.ones((df_p.shape[0], 1), dtype=int)) * (40000)) # Se comentó esta línea
+    #df_p.insert(len(df_p.columns), 'MERCADO_SEED', vector.values) # Se comentó esta línea
     #st.write(df_p)
 
     # Se cargan los 3 modelos de pronóstico: Redes Neuronales, Random Forest y XGBoost que fueron guardados
@@ -978,7 +975,7 @@ def rezago_mercado_lote(): # Predicción de varios meses. Esta función le solic
     X = df_p.values
     X_RN = np.concatenate([numpy1, X])  # Para RN
 
-    # Para los modelos RF y XG: Se elimina la última columna de df_p, con los valores imputados en 7000 para RUNT MERCADO.
+    # Para los modelos RF y XG: Se elimina la última columna de df_p, con los valores imputados en 40000 para RUNT MERCADO.
     X = X[:, 0: df_p.shape[1] - 1]  # Para RF y XG
 
     # Redes Neuronales
@@ -1005,7 +1002,7 @@ def rezago_mercado_lote(): # Predicción de varios meses. Esta función le solic
     st.write('**Pronóstico**')
     resultados = pd.DataFrame({'Fecha': index_pron, 'Redes Neuronales': np.around(y_hat_RN), 'Random Forest': np.around(y_hat_RF), 'XGBoost': np.around(y_hat_XG), 'Promedio': np.around(y_hat_prom)})
     resultados = resultados.astype({'Redes Neuronales': int, 'Random Forest': int, 'XGBoost': int, 'Promedio': int})
-    resultados['Fecha'] = resultados['Fecha'].apply(lambda x: (x + relativedelta(months=+12)).strftime('%d/%m/%Y'))
+    #resultados['Fecha'] = resultados['Fecha'].apply(lambda x: (x + relativedelta(months=+12)).strftime('%Y-%m-%d'))
     resultados.set_index('Fecha', inplace=True)
     resultados.to_excel('pronosticos.xlsx', index=True)
 
@@ -1088,7 +1085,7 @@ def HoltWinters(variable):
     MES = int(MES)
 
     # Se carga el dataset original y se realizan sobre él algunas funciones básicas de limpieza
-    df = pd.read_excel('BD_Actualizada_Ene2023.xlsx', sheet_name="RUNT_Total")
+    df = pd.read_excel('BD_Actualizada_Feb2023.xlsx', sheet_name="RUNT_Total")
     df3 = df.copy()
     df3 = df3.reset_index(drop=True)
     df3.set_index('FECHA', inplace=True)
@@ -1106,7 +1103,7 @@ def HoltWinters(variable):
     MES = int(MES)
 
     # Se carga el dataset original y se realizan sobre él algunas funciones básicas de limpieza
-    df = pd.read_excel('BD_Actualizada_Ene2023.xlsx', sheet_name="RUNT_Total")
+    df = pd.read_excel('BD_Actualizada_Feb2023.xlsx', sheet_name="RUNT_Total")
     df3 = df.copy()
     df3 = df3.reset_index(drop=True)
     df3.set_index('FECHA', inplace=True)
@@ -1228,15 +1225,18 @@ def HoltWinters(variable):
     # Se calculan los errores
     st.write('**Errores**')
     MAE_Opt = "{:.0f}".format(mean_absolute_error(ts_v, pred_HW))
-    MAPE_Opt = "{:.2%}".format(mean_absolute_percentage_error(ts_v, pred_HW))
+    MAPE_Opt = "{:.0%}".format(mean_absolute_percentage_error(ts_v, pred_HW))
     MAE_SinOpt = "{:.0f}".format(mean_absolute_error(ts_v, pred))
-    MAPE_SinOpt = "{:.2%}".format(mean_absolute_percentage_error(ts_v, pred))
+    MAPE_SinOpt = "{:.0%}".format(mean_absolute_percentage_error(ts_v, pred))
 
     # Se imprimen los errores en pantalla
     errores = pd.DataFrame()
     errores['Errores'] = ['MAE', 'MAPE']
     errores['Optimizado'] = [MAE_Opt, MAPE_Opt]
     errores['Sin optimizar'] = [MAE_SinOpt, MAPE_SinOpt]
+    # errores['Errores'] = ['MAE']
+    # errores['Optimizado'] = [MAE_Opt]
+    # errores['Sin optimizar'] = [MAE_SinOpt]
     errores.set_index('Errores', inplace=True)
     st.write(errores.T)
 
@@ -1404,9 +1404,9 @@ def Holt_Winters():
         # Se calculan los errores
         st.write('**Errores**')
         MAE_Opt = "{:.0f}".format(mean_absolute_error(ts_v, pred_HW))
-        MAPE_Opt = "{:.2%}".format(mean_absolute_percentage_error(ts_v, pred_HW))
+        MAPE_Opt = "{:.0%}".format(mean_absolute_percentage_error(ts_v, pred_HW))
         MAE_SinOpt = "{:.0f}".format(mean_absolute_error(ts_v, pred))
-        MAPE_SinOpt = "{:.2%}".format(mean_absolute_percentage_error(ts_v, pred))
+        MAPE_SinOpt = "{:.0%}".format(mean_absolute_percentage_error(ts_v, pred))
 
         # Se imprimen los errores en pantalla
         errores = pd.DataFrame()
@@ -1444,7 +1444,7 @@ def Holt_Winters():
 
 st.title("Pronósticos Motocicletas - Incolmotos Yamaha")
 
-st.sidebar.image("https://raw.githubusercontent.com/Analiticadatosiy/Pronosticos_MC/master/YAMAHA.PNG?token=ATEVFY6JYIBS3BZZKNKD5ADAWVFBY", width=250)
+st.sidebar.image("https://raw.githubusercontent.com/Analiticadatosiy/Pronosticos/master/YAMAHA.PNG?token=ATEVFY6JYIBS3BZZKNKD5ADAWVFBY", width=250)
 # img = Image.open(get_file_content_as_string("YAMAHA.PNG"))
 # st.sidebar.image(img, width=250)
 
@@ -1772,10 +1772,13 @@ else:
             columns = df_p.shape[1]
             # Se crea la columna RATIO_DH_F
             df_p.iloc[:, columns - 2] = df_p.iloc[:, columns - 2] / (df_p.iloc[:, columns - 2] + df_p.iloc[:, columns - 1])
+            #df_p.rename(columns={'DIAS HABILES': 'RATIO_DH_F'}, inplace=True)
 
-            # Se rellena la última columna RUNT YAMAHA con el valor semilla de 8000, para los meses de pronóstico ingresados por el usuario.
+            # Se rellena la última columna RUNT YAMAHA con el valor semilla de 10, para los meses de pronóstico ingresados por el usuario.
             for i in range(0, df_p.shape[0], 1):
-              df_p.iloc[i, columns - 1] = 8000
+              df_p.iloc[i, columns - 1] = 10
+
+            #df_p.rename(columns={'FESTIVOS': t}, inplace=True)
 
             lista_targets = ['RUNT MERCADO', 'RUNT YAMAHA', 'RUNT NMAX', 'RUNT NMAX CONNECTED', 'RUNT CRYPTON FI',
                              'RUNT XTZ125', 'RUNT XTZ150', 'RUNT XTZ250', 'RUNT MT03', 'RUNT FZ25', 'RUNT FZ15',
@@ -1804,7 +1807,7 @@ else:
               X = df_p.values
               X_RN = np.concatenate([numpy1, X])
 
-              # Para los modelos RF y XG: Se elimina la última columna de df_p, con los valores imputados en 8000 para RUNT YAMAHA
+              # Para los modelos RF y XG: Se elimina la última columna de df_p, con los valores imputados en el valor semilla asignado al modelo MC correspondiente.
               X = X[:, 0: df_p.shape[1] - 1]
 
               # Redes Neuronales
@@ -1880,8 +1883,8 @@ else:
           # Se crea el subtítulo
           st.subheader('Estimar demanda con datos reales del último año: ' + selectbox1 + ' - ' + selectbox4 + '.')
           # Se dan instrucciones (por pantalla) al usuario sobre los datos que debe ingresar y su formato
-          st.write('Por favor, ingrese el dato de las variables un año atras del período que desea estimar, es decir, si desea estimar Junio de 2021, ingrese los datos de Junio de 2020 (para el caso de los días hábiles y festivos, sí se deben ingresar los valores reales para el mes que se desea pronosticar)')
-          st.write('Tome como guía los valores y formatos de la tabla que se muestra a continuación.')
+          st.write('Esta aplicación tomará los datos de las variables un año atras del período que se desea estimar, para calcular el(los) pronóstico(s); es decir, si se requiere estimar Junio de 2023, se tendrán en cuenta los datos de Junio de 2022. Para el caso de los días hábiles y festivos, deberá ingresar los valores reales para el mes que desee pronosticar.')
+          #st.write('Tome como guía los valores y formatos de la tabla que se muestra a continuación.')
 
           # Se imprimen los últimos 6 registros de la tabla
           dataset1, numpy1, dataset2 = limpieza_actual(df_runt_modelo_yamaha, 'RUNT MERCADO', 'RUNT YAMAHA')
@@ -2028,9 +2031,10 @@ else:
             st.write('**Históricos**')
             # Se imprimen los últimos 6 registros de la tabla
             #dataset2.index = dataset2.index.strftime('%d/%m/%Y')
+            dataset2.index = dataset2.index.date
             st.write(dataset2.tail(6))
 
-            df_p = df_runt_total.loc[(df_runt_total['FECHA'] > date_ini) & (df_runt_total['FECHA'] <= date_act)]
+            df_p = df_runt_total.loc[(df_runt_total['FECHA'] >= date_ini) & (df_runt_total['FECHA'] <= date_act)]
             df_p = df_p.iloc[:, [0, 1, 2, 3, 4, 6, 8, 9, 10]].dropna()
 
             index_pron = df_p['FECHA']  # Se almacena la columna Fecha, en la nueva variable index_pron, con la fecha correspondiente a cada fila de pronóstico.
@@ -2043,7 +2047,7 @@ else:
             # Se rellena la última columna RUNT YAMAHA con el valor semilla de 10, para los meses de rezago ingresados por el usuario.
             vector = pd.DataFrame((np.ones((df_p.shape[0], 1), dtype=int)) * (10))
             # st.write(vector)
-            df_p.insert(len(df_p.columns), 'YAMAHA SEED', vector.values)
+            df_p.insert(len(df_p.columns), 'YAMAHA_SEED', vector.values)
             # st.write(df_p)
 
             # Para el modelo de RN: El dataset df_p se convierte en arreglo, para poder concatenarlo con numpy1.
@@ -2056,7 +2060,7 @@ else:
             modeloRF_r_yamaha = joblib.load('modeloRF_r_' + modelo_MC + '.pkl')
             modeloXG_r_yamaha = joblib.load('modeloXG_r_' + modelo_MC + '.pkl')
 
-            # Para los modelos RF y XG: Se elimina la última columna de df_p, con los valores imputados en 7000 para RUNT YAMAHA.
+            # Para los modelos RF y XG: Se elimina la última columna de df_p, con los valores imputados en el valor semilla asignado al modelo MC correspondiente.
             X = X[:, 0: df_p.shape[1] - 1]  # Para RF y XG
 
             # Redes Neuronales
@@ -2083,7 +2087,7 @@ else:
             st.write('**Pronósticos**')
             resultados = pd.DataFrame({'Fecha': index_pron, 'Redes Neuronales': np.around(y_hat_RN), 'Random Forest': np.around(y_hat_RF), 'XGBoost': np.around(y_hat_XG), 'Promedio': np.around(y_hat_prom)})
             resultados = resultados.astype({'Redes Neuronales': int, 'Random Forest': int, 'XGBoost': int, 'Promedio': int})
-            resultados['Fecha'] = resultados['Fecha'].apply(lambda x: (x + relativedelta(months=+12)).strftime('%d/%m/%Y'))
+            resultados['Fecha'] = resultados['Fecha'].apply(lambda x: (x + relativedelta(months=+12)).strftime('%Y-%m-%d'))
             resultados.set_index('Fecha', inplace=True)
             resultados.to_excel('pronosticos.xlsx', index=True)
 
@@ -2132,167 +2136,193 @@ else:
         MES = st.number_input("Meses", value=12)  # El número de meses se establece en 12, por defecto; sin embargo, el usuario puede modificarlo a voluntad desde la app.
         MES = int(MES)
 
+        # # Se configuran los parámetros de suavizamiento:
+        # def exp_smoothing_configs(seasonal=[None]):
+        #   models = list()
+        #   # Se define la lista de configuraciones
+        #   t_params = ['add', 'mul', None]  # Componente de la tendencia (add: aditivo - mul: multiplicativo)
+        #   d_params = [True, False]
+        #   s_params = ['add', 'mul', None]  # Componente estacional (add: aditivo - mul: multiplicativo)
+        #   p_params = seasonal
+        #   b_params = [True, False]
+        #   r_params = [True, False]
+        #   # Se crean las instancias de las configuraciones
+        #   for t in t_params:
+        #     for d in d_params:
+        #       for s in s_params:
+        #         for p in p_params:
+        #           for b in b_params:
+        #             for r in r_params:
+        #               cfg = [t, d, s, p, b, r]
+        #               models.append(cfg)
+        #   return models
+
         for modelo_MC in modelos_seleccionados:
 
-          data = 'RUNT ' + modelo_MC # Los datos que se van a usar para hacer el pronóstico de RUNT Modelo, serán el histórico de ventas Modelo.
+          if modelo_MC == 'NMAX CONNECTED' or modelo_MC == 'YBRZ125':
+            st.subheader(modelo_MC)
+            st.write('No hay suficientes datos de RUNT para soportar el modelo estadístico.')
 
-          # Se carga el dataset original y se realizan sobre él algunas funciones básicas de limpieza
-          df = df_runt_modelo_yamaha
-          df3 = df.copy()
-          df3 = df3.reset_index(drop=True)
-          df3.set_index('FECHA', inplace=True)
-          df3.index.freq = 'MS'
-          df3 = df3[data]
-          df3 = df3.dropna()
-
-          cfg_list = exp_smoothing_configs(seasonal=[12])  # Se puede probar con [0,6,12]
-
-          train_size = int(len(df3) * 0.85)  # Se define el tamaño del conjunto de entrenamiento: el 85%  de los datos.
-          test_size = len(df3) - train_size  # Se calcula el tamaño del conjunto de prueba: los datos restantes.
-          ts = df3.iloc[0:train_size].copy()  # Se define el conjunto de entrenamiento
-          ts_v = df3.iloc[train_size:len(df3)].copy()  # Se define el conjunto de prueba
-          ind = df3.index[-test_size:]  # Se seleccionan los índices de los últimos 12 meses
-
-          best_RMSE = np.inf
-          best_config = []
-          t1 = d1 = s1 = p1 = b1 = r1 = None
-          mape = []
-          y_forecast = []
-          model = ()
-
-          my_bar = st.progress(0)  # Barra de progreso en Streamlit
-          status_text = st.empty()
-
-          for j in range(len(cfg_list)):
-            try:
-              cg = cfg_list[j]
-              t, d, s, p, b, r = cg
-              # Se define el modelo HoltWinters
-              if (t == None):
-                model = HWES(ts, trend=t, seasonal=s, seasonal_periods=p)
-              else:
-                model = HWES(ts, trend=t, damped=d, seasonal=s, seasonal_periods=p)
-              # Se entrena el modelo
-              model_fit = model.fit(optimized=True, remove_bias=r)
-              y_forecast = model_fit.forecast(test_size)
-              pred_ = pd.Series(data=y_forecast, index=ind)
-              # Se imprimen las predicciones pasadas
-              # df_pass_pred = pd.concat([ts_v, pred_.rename('pred_HW')], axis=1)
-              # st.write(df_pass_pred)
-              # Se calcula el error
-              mape = mean_absolute_percentage_error(ts_v, y_forecast)
-              # rmse = np.sqrt(mean_squared_error(ts_v,y_forecast))
-              if mape < best_RMSE:  # Cambiar mape por RMSE
-                best_RMSE = mape
-                best_config = cfg_list[j]
-            except Exception as e:
-              print(e)
-              continue
-
-            time.sleep(0.1)
-            status_text.warning('Calculando')
-            if j == (len(cfg_list) - 1):
-              j = 100
-            my_bar.progress(j)
-
-          st.subheader(modelo_MC)
-
-          status_text.success('Listo!')
-          # st.write(best_config)
-          # status_text.success(best_config)
-          t1, d1, s1, p1, b1, r1 = best_config
-
-          # Se entrenará el modelo con los parametros hallados (uno entrenará con el conjunto de entrenamiento -hw_model1- para obtener errores, y el otro entrenará con el dataset completo -hw-)
-          if t1 == None:
-            hw_model1 = HWES(ts, trend=t1, seasonal=s1, seasonal_periods=p1)
-            hw = HWES(df3, trend=t1, seasonal=s1, seasonal_periods=p1)
           else:
-            hw_model1 = HWES(ts, trend=t1, seasonal=s1, seasonal_periods=p1, damped=d1)
-            hw = HWES(df3, trend=t1, seasonal=s1, seasonal_periods=p1, damped=d1)
+            data = 'RUNT ' + modelo_MC # Los datos que se van a usar para hacer el pronóstico de RUNT Modelo, serán el histórico de ventas Modelo.
 
-          fit2 = hw_model1.fit(optimized=True, remove_bias=r1)
-          pred_HW = fit2.predict(start=pd.to_datetime(ts_v.index[0]), end=pd.to_datetime(ts_v.index[len(ts_v) - 1]))
-          pred_HW = pd.Series(data=pred_HW, index=ind)
+            # Se carga el dataset original y se realizan sobre él algunas funciones básicas de limpieza
+            df = df_runt_modelo_yamaha
+            df3 = df.copy()
+            df3 = df3.reset_index(drop=True)
+            df3.set_index('FECHA', inplace=True)
+            df3.index.freq = 'MS'
+            df3 = df3[data]
+            df3 = df3.dropna()
 
-          fitted = hw.fit(optimized=True, remove_bias=r1)
-          y_hat = fitted.forecast(steps=MES)
+            cfg_list = exp_smoothing_configs(seasonal=[12])  # Se puede probar con [0,6,12]
 
-          modelo = HWES(ts, seasonal_periods=12, trend='add', seasonal='add')
-          fitted_wo = modelo.fit(optimized=True, use_brute=True)
-          pred = fitted_wo.predict(start=pd.to_datetime(ts_v.index[0]), end=pd.to_datetime(ts_v.index[len(ts_v) - 1]))
-          pred = pd.Series(data=pred, index=ind)
+            train_size = int(len(df3) * 0.85)  # Se define el tamaño del conjunto de entrenamiento: el 85%  de los datos.
+            test_size = len(df3) - train_size  # Se calcula el tamaño del conjunto de prueba: los datos restantes.
+            ts = df3.iloc[0:train_size].copy()  # Se define el conjunto de entrenamiento
+            ts_v = df3.iloc[train_size:len(df3)].copy()  # Se define el conjunto de prueba
+            ind = df3.index[-test_size:]  # Se seleccionan los índices de los últimos 12 meses
 
-          model = HWES(df3, seasonal_periods=12, trend='add', seasonal='add')
-          fit = model.fit(optimized=True, remove_bias=True)
-          y_hat2 = fit.forecast(steps=MES)
+            best_RMSE = np.inf
+            best_config = []
+            t1 = d1 = s1 = p1 = b1 = r1 = None
+            mape = []
+            y_forecast = []
+            model = ()
 
-          tiempo = []
-          nuevo_index = []
-          for i in range(0, MES, 1):
-            a = df3.index[len(df3) - 1] + relativedelta(months=+(1 + i))
-            b = a.strftime('%d/%m/%Y')
-            nuevo_index.append(a)
-            tiempo.append(b)
+            my_bar = st.progress(0)  # Barra de progreso en Streamlit
+            status_text = st.empty()
 
-          # Se almacenan los resultados en un dataframe y se exportan a Excel, para que el usuario pueda descargarlos.
-          # st.markdown('**Pronósticos:**')
-          resultados = pd.DataFrame({'Resultados optimizados': np.around(y_hat).ravel(), 'Resultados sin optimizar': np.around(y_hat2).ravel()}, index=tiempo)
-          resultados.to_excel('pronosticos.xlsx', index=True)
+            for j in range(len(cfg_list)):
+              try:
+                cg = cfg_list[j]
+                t, d, s, p, b, r = cg
+                # Se define el modelo HoltWinters
+                if (t == None):
+                  model = HWES(ts.astype(int), trend=t, seasonal=s, seasonal_periods=p)
+                else:
+                  model = HWES(ts.astype(int), trend=t, damped=d, seasonal=s, seasonal_periods=p)
+                # Se entrena el modelo
+                model_fit = model.fit(optimized=True, remove_bias=r)
+                y_forecast = model_fit.forecast(test_size)
+                pred_ = pd.Series(data=y_forecast, index=ind)
+                # Se imprimen las predicciones pasadas
+                # df_pass_pred = pd.concat([ts_v, pred_.rename('pred_HW')], axis=1)
+                # st.write(df_pass_pred)
+                # Se calcula el error
+                mape = mean_absolute_percentage_error(ts_v, y_forecast)
+                # rmse = np.sqrt(mean_squared_error(ts_v,y_forecast))
+                if mape < best_RMSE:  # Cambiar mape por RMSE
+                  best_RMSE = mape
+                  best_config = cfg_list[j]
+              except Exception as e:
+                print(e)
+                continue
 
-          # Se habilita al usuario la descarga de los pronósticos por pantalla, en formato xlsx.
-          with open("pronosticos.xlsx", "rb") as file:
-            btn = st.download_button(
-              label="Descargar pronosticos",
-              data=file,
-              file_name="Pronosticos.xlsx",
-              mime="image/png")
+              time.sleep(0.1)
+              status_text.warning('Calculando')
+              if j == (len(cfg_list) - 1):
+                j = 100
+              my_bar.progress(j)
 
-          # Se imprimen los resultados de los pronósticos en pantalla
-          resultados['Resultados optimizados'] = resultados['Resultados optimizados'].astype(int)
-          resultados['Resultados sin optimizar'] = resultados['Resultados sin optimizar'].astype(int)
-          st.dataframe(resultados)
+            st.subheader(modelo_MC)
 
-          # Se calculan los errores
-          st.write('**Errores**')
-          MAE_Opt = "{:.0f}".format(mean_absolute_error(ts_v, pred_HW))
-          MAPE_Opt = "{:.2%}".format(mean_absolute_percentage_error(ts_v, pred_HW))
-          MAE_SinOpt = "{:.0f}".format(mean_absolute_error(ts_v, pred))
-          MAPE_SinOpt = "{:.2%}".format(mean_absolute_percentage_error(ts_v, pred))
+            status_text.success('Listo!')
+            # st.write(best_config)
+            # status_text.success(best_config)
+            t1, d1, s1, p1, b1, r1 = best_config
 
-          # Se imprimen los errores en pantalla
-          errores = pd.DataFrame()
-          errores['Errores'] = ['MAE', 'MAPE']
-          errores['Optimizado'] = [MAE_Opt, MAPE_Opt]
-          errores['Sin optimizar'] = [MAE_SinOpt, MAPE_SinOpt]
-          errores.set_index('Errores', inplace=True)
-          st.write(errores.T)
+            # Se entrenará el modelo con los parametros hallados (uno entrenará con el conjunto de entrenamiento -hw_model1- para obtener errores, y el otro entrenará con el dataset completo -hw-)
+            if t1 == None:
+              hw_model1 = HWES(ts.astype(int), trend=t1, seasonal=s1, seasonal_periods=p1)
+              hw = HWES(df3.astype(int), trend=t1, seasonal=s1, seasonal_periods=p1)
+            else:
+              hw_model1 = HWES(ts.astype(int), trend=t1, seasonal=s1, seasonal_periods=p1, damped=d1)
+              hw = HWES(df3.astype(int), trend=t1, seasonal=s1, seasonal_periods=p1, damped=d1)
 
-          # Gráfica 1: Se grafican los pronósticos optimizados y sin optimizar
-          anio = '2015'  # Parámetro de control: Para determinar desde que año se va a graficar.
-          agrupados = pd.DataFrame({'Optimizado': np.around(y_hat).ravel(), 'Sin optimizar': np.around(y_hat2).ravel()}, index=nuevo_index)
-          total = pd.concat([df3[anio:], agrupados])
-          total.rename(columns={0: 'RUNT ' + modelo_MC}, inplace=True)  # Esta variable tiene estacionalidad
-          total = total.reset_index()
-          df_melt = total.melt(id_vars='index', value_vars=['RUNT ' + modelo_MC, 'Optimizado', 'Sin optimizar'])
-          px.defaults.width = 1100
-          px.defaults.height = 500
-          fig = px.line(df_melt, x='index', y='value', color='variable', labels={"index": "FECHA", "value": "RUNT"})
-          st.plotly_chart(fig)
+            fit2 = hw_model1.fit(optimized=True, remove_bias=r1)
+            pred_HW = fit2.predict(start=pd.to_datetime(ts_v.index[0]), end=pd.to_datetime(ts_v.index[len(ts_v) - 1]))
+            pred_HW = pd.Series(data=pred_HW, index=ind)
 
-          # Gráfica 2: Se grafican los pronósticos ajustados y optimizados, y, ajustados sin optimizar
-          ajustados = pd.DataFrame({'Ajustado optimizado': np.around(fitted.fittedvalues).ravel(), 'Ajustado sin optimizar': np.around(fit.fittedvalues).ravel()}, index=df3.index)
-          ajustados_total = pd.concat([df3[anio:], ajustados[anio:]], axis=1)
-          ajustados_total = ajustados_total.reset_index()
-          df_melt_fitted = ajustados_total.melt(id_vars='FECHA', value_vars=[data, 'Ajustado optimizado', 'Ajustado sin optimizar'])
-          px.defaults.width = 1100
-          px.defaults.height = 500
-          fig = px.line(df_melt_fitted, x='FECHA', y='value', color='variable', labels={"value": "RUNT"})
-          st.plotly_chart(fig)
+            fitted = hw.fit(optimized=True, remove_bias=r1)
+            y_hat = fitted.forecast(steps=MES)
 
-          st.write('Aunque en las gráficas se observa el Runt desde ' + anio + ', los modelos de predicción están construidos con datos desde 2001 en el caso de Yamaha, y 2005 en el caso de Mercado.')
+            modelo = HWES(ts.astype(int), seasonal_periods=12, trend='add', seasonal='add')
+            fitted_wo = modelo.fit(optimized=True, use_brute=True)
+            pred = fitted_wo.predict(start=pd.to_datetime(ts_v.index[0]), end=pd.to_datetime(ts_v.index[len(ts_v) - 1]))
+            pred = pd.Series(data=pred, index=ind)
+
+            model = HWES(df3.astype(int), seasonal_periods=12, trend='add', seasonal='add')
+            fit = model.fit(optimized=True, remove_bias=True)
+            y_hat2 = fit.forecast(steps=MES)
+
+            tiempo = []
+            nuevo_index = []
+            for i in range(0, MES, 1):
+              a = df3.index[len(df3) - 1] + relativedelta(months=+(1 + i))
+              b = a.strftime('%d/%m/%Y')
+              nuevo_index.append(a)
+              tiempo.append(b)
+
+            # Se almacenan los resultados en un dataframe y se exportan a Excel, para que el usuario pueda descargarlos.
+            # st.markdown('**Pronósticos:**')
+            resultados = pd.DataFrame({'Resultados optimizados': np.around(y_hat).ravel(), 'Resultados sin optimizar': np.around(y_hat2).ravel()}, index=tiempo)
+            resultados.to_excel('pronosticos.xlsx', index=True)
+
+            # Se habilita al usuario la descarga de los pronósticos por pantalla, en formato xlsx.
+            with open("pronosticos.xlsx", "rb") as file:
+              btn = st.download_button(
+                label="Descargar pronosticos",
+                data=file,
+                file_name="Pronosticos.xlsx",
+                mime="image/png")
+
+            # Se imprimen los resultados de los pronósticos en pantalla
+            resultados['Resultados optimizados'] = resultados['Resultados optimizados'].astype(int)
+            resultados['Resultados sin optimizar'] = resultados['Resultados sin optimizar'].astype(int)
+            st.dataframe(resultados)
+
+            # Se calculan los errores
+            st.write('**Errores**')
+            MAE_Opt = "{:.0f}".format(mean_absolute_error(ts_v, pred_HW))
+            MAPE_Opt = "{:.0%}".format(mean_absolute_percentage_error(ts_v, pred_HW))
+            MAE_SinOpt = "{:.0f}".format(mean_absolute_error(ts_v, pred))
+            MAPE_SinOpt = "{:.0%}".format(mean_absolute_percentage_error(ts_v, pred))
+
+            # Se imprimen los errores en pantalla
+            errores = pd.DataFrame()
+            errores['Errores'] = ['MAE', 'MAPE']
+            errores['Optimizado'] = [MAE_Opt, MAPE_Opt]
+            errores['Sin optimizar'] = [MAE_SinOpt, MAPE_SinOpt]
+            errores.set_index('Errores', inplace=True)
+            st.write(errores.T)
+
+            # Gráfica 1: Se grafican los pronósticos optimizados y sin optimizar
+            anio = '2015'  # Parámetro de control: Para determinar desde que año se va a graficar.
+            agrupados = pd.DataFrame({'Optimizado': np.around(y_hat).ravel(), 'Sin optimizar': np.around(y_hat2).ravel()}, index=nuevo_index)
+            total = pd.concat([df3[anio:], agrupados])
+            total.rename(columns={0: 'RUNT ' + modelo_MC}, inplace=True)  # Esta variable tiene estacionalidad
+            total = total.reset_index()
+            df_melt = total.melt(id_vars='index', value_vars=['RUNT ' + modelo_MC, 'Optimizado', 'Sin optimizar'])
+            px.defaults.width = 1100
+            px.defaults.height = 500
+            fig = px.line(df_melt, x='index', y='value', color='variable', labels={"index": "FECHA", "value": "RUNT"})
+            st.plotly_chart(fig)
+
+            # Gráfica 2: Se grafican los pronósticos ajustados y optimizados, y, ajustados sin optimizar
+            ajustados = pd.DataFrame({'Ajustado optimizado': np.around(fitted.fittedvalues).ravel(), 'Ajustado sin optimizar': np.around(fit.fittedvalues).ravel()}, index=df3.index)
+            ajustados_total = pd.concat([df3[anio:], ajustados[anio:]], axis=1)
+            ajustados_total = ajustados_total.reset_index()
+            df_melt_fitted = ajustados_total.melt(id_vars='FECHA', value_vars=[data, 'Ajustado optimizado', 'Ajustado sin optimizar'])
+            px.defaults.width = 1100
+            px.defaults.height = 500
+            fig = px.line(df_melt_fitted, x='FECHA', y='value', color='variable', labels={"value": "RUNT"})
+            st.plotly_chart(fig)
+
+            st.write('Aunque en las gráficas se observa el Runt desde ' + anio + ', los modelos de predicción están construidos con datos desde 2001 en el caso de Yamaha, y 2005 en el caso de Mercado.')
 
   elif selectbox1 == 'Mercado':
-    selectbox2 = st.sidebar.selectbox('¿Cómo desea hacer la estimación?: ', opciones2)
+    selectbox2 = st.sidebar.selectbox('¿Cómo desea hacer la estimación?', opciones2)
     if selectbox2 == 'Suponiendo indicadores económicos':
       selectbox3 = st.sidebar.selectbox('Alcance:', opciones3)
       if selectbox3 == 'Predicción de un sólo mes':

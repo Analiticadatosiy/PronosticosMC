@@ -106,33 +106,9 @@ def MAPE(Y_actual, Y_Predicted):
     return mape
 
 # Se importan los datos por única vez
-# df = pd.read_excel('BD_Actualizada_Ene2023.xlsx', sheet_name='RUNT_Modelo_Yamaha', converters={'TRM': int, 'SMMLV&AUXTTE': int, 'DIAS HABILES': int, 'FESTIVOS': int, 'RUNT MERCADO': int, 'RUNT YAMAHA': int,
-#                    'RUNT NMAX': int, 'RUNT NMAX CONNECTED': int, 'RUNT CRYPTON FI': int, 'RUNT XTZ125': int, 'RUNT XTZ150': int, 'RUNT XTZ250': int, 'RUNT MT03': int, 'RUNT FZ25': int, 'RUNT FZ15': int,
-#                    'RUNT SZ15RR': int, 'RUNT YBRZ125': int, 'RUNT YCZ110': int, 'RUNT XMAX': int})
+df = pd.read_excel('BD_Actualizada_Feb2023.xlsx', sheet_name='RUNT_Modelo_Yamaha', converters={'TRM': int, 'SMMLV&AUXTTE': int, 'DIAS HABILES': int, 'FESTIVOS': int, 'RUNT MERCADO': int, 'RUNT YAMAHA': int, 'RUNT NMAX': int, 'RUNT NMAX CONNECTED': int, 'RUNT CRYPTON FI': int, 'RUNT XTZ125': int, 'RUNT XTZ150': int, 'RUNT XTZ250': int, 'RUNT MT03': int, 'RUNT FZ25': int, 'RUNT FZ15': int, 'RUNT SZ15RR': int, 'RUNT YBRZ125': int, 'RUNT YCZ110': int, 'RUNT XMAX': int})
 
-df = pd.read_excel('BD_Actualizada_Ene2023.xlsx', sheet_name='RUNT_Modelo_Yamaha')
-
-lista = ['RUNT YAMAHA', 'RUNT MERCADO', 'RUNT NMAX', 'RUNT NMAX CONNECTED', 'RUNT CRYPTON FI', 'RUNT XTZ125', 'RUNT XTZ150', 'RUNT XTZ250', 'RUNT MT03', 'RUNT FZ25',
-         'RUNT FZ15', 'RUNT SZ15RR', 'RUNT YBRZ125', 'RUNT YCZ110', 'RUNT XMAX']
-
-nombre = ['TARGET YAMAHA', 'TARGET MERCADO', 'TARGET NMAX', 'TARGET NMAX CONNECTED', 'TARGET CRYPTON FI', 'TARGET XTZ125', 'TARGET XTZ150', 'TARGET XTZ250', 'TARGET MT03', 'TARGET FZ25',
-         'TARGET FZ15', 'TARGET SZ15RR', 'TARGET YBRZ125', 'TARGET YCZ110', 'TARGET XMAX']
-
-df_target = target(df, lista, nombre) # Se define el target
-
-numericos = separacion(df, 0) # Se separan los datos numéricos de los alfanuméricos
-numericos = pd.concat([numericos, df_target], axis = 1) # Se concatena la parte numérica del dataframe original con el target de interés para el usuario
-
-numericos_clean4 = numericos.drop(['RUNT YAMAHA', 'RUNT MERCADO', 'RUNT NMAX', 'RUNT NMAX CONNECTED', 'RUNT CRYPTON FI', 'RUNT XTZ125', 'RUNT XTZ150', 'RUNT XTZ250',
-                                   'RUNT MT03', 'RUNT FZ25', 'RUNT FZ15', 'RUNT SZ15RR', 'RUNT YBRZ125', 'RUNT YCZ110', 'RUNT XMAX',
-                                   'ICC'], axis = 1) # Se eliminan las variables que no entrarán en la regresión???
-
-# Se crea una nueva columna con la ponderación de días hábiles entre festivos
-numericos_clean4['DIAS HABILES'] = numericos_clean4['DIAS HABILES']/(numericos_clean4['DIAS HABILES']+numericos_clean4['FESTIVOS'])
-numericos_clean4 = numericos_clean4.drop(['FESTIVOS'], axis = 1)
-numericos_clean4.rename(columns = {'DIAS HABILES': 'RATIO_DH_F'}, inplace=True) # Esta variable tiene estacionalidad
-
-dataset = numericos_clean4.copy() # Se crea una copia de respaldo del último dataset
+target_list = ['RUNT MERCADO', 'RUNT YAMAHA', 'RUNT NMAX', 'RUNT NMAX CONNECTED', 'RUNT CRYPTON FI', 'RUNT XTZ125', 'RUNT XTZ150', 'RUNT XTZ250', 'RUNT MT03', 'RUNT FZ25', 'RUNT FZ15', 'RUNT SZ15RR', 'RUNT YBRZ125', 'RUNT YCZ110', 'RUNT XMAX']
 
 ###########################################################################################################################################################################################################
 
@@ -143,16 +119,23 @@ dataset = numericos_clean4.copy() # Se crea una copia de respaldo del último da
 def preprocesamientoRN(dataframe):
     df = dataframe.copy()
     df = df.values
+
     X = df[:, 0: df.shape[1] - 1]
     Y = df[:, df.shape[1] - 1:]
+
     min_max_scaler = preprocessing.MinMaxScaler([-1, 1])
     X_scale = min_max_scaler.fit_transform(X)
     Y_scale = min_max_scaler.fit_transform(Y)
-    X_test = X_scale[X_scale.shape[0] - 4:, :]
-    Y_test = Y_scale[Y_scale.shape[0] - 4:, :]
-    X_scale = X_scale[:X_scale.shape[0] - 4, :]
-    Y_scale = Y_scale[:Y_scale.shape[0] - 4, :]
-    X_train, X_valid, Y_train, Y_valid = train_test_split(X_scale, Y_scale, test_size=0.3, random_state=1)
+
+    # X_test = X_scale[X_scale.shape[0] - 4:, :]
+    # Y_test = Y_scale[Y_scale.shape[0] - 4:, :]
+    # X_scale = X_scale[:X_scale.shape[0] - 4, :]
+    # Y_scale = Y_scale[:Y_scale.shape[0] - 4, :]
+
+    X_train, X_test, Y_train, Y_test = train_test_split(X_scale, Y_scale, test_size=0.2, shuffle=True, random_state=8)
+    X_train, X_valid, Y_train, Y_valid = train_test_split(X_train, Y_train, test_size=0.25, random_state=8)  # 0.25 x 0.8 = 0.2
+
+    #X_train, X_valid, Y_train, Y_valid = train_test_split(X_scale, Y_scale, test_size=0.3, random_state=1)
     return min_max_scaler, X_train, X_valid, X_test, Y_train, Y_valid, Y_test
 
 def entrenamientoRN(X_train, Y_train, X_valid, Y_valid):
@@ -162,9 +145,19 @@ def entrenamientoRN(X_train, Y_train, X_valid, Y_valid):
     hist = model.fit(X_train, Y_train, batch_size=2, epochs=300, validation_data=(X_valid, Y_valid), callbacks=[es])
     return hist, model
 
-for t in nombre:
+for t in target_list:
+
+    df_aux = df[['FECHA', 'DESEMPLEO', 'INFLACION', 'TRM', 'SMMLV&AUXTTE', 'ICC', 'IEC', 'ICE', 'PRECIO PETROLEO WTI', 'DIAS HABILES', 'FESTIVOS', t]]
+
+    dataset = df_aux.dropna()
+
+    # Se crea una nueva columna con la ponderación de días hábiles entre festivos
+    dataset['DIAS HABILES'] = dataset['DIAS HABILES'] / (dataset['DIAS HABILES'] + dataset['FESTIVOS'])
+    dataset = dataset.drop(['FESTIVOS'], axis=1)
+    dataset.rename(columns={'DIAS HABILES': 'RATIO_DH_F'}, inplace=True)  # La variable RATIO_DH_F tiene estacionalidad ## , 'RUNT' + t[6:]: t
 
     dataset_target = dataset[['DESEMPLEO', 'INFLACION', 'TRM', 'SMMLV&AUXTTE', 'IEC', 'ICE', 'PRECIO PETROLEO WTI', 'RATIO_DH_F', t]]
+
     scaler, X_train, X_valid, X_test, Y_train, Y_valid, Y_test = preprocesamientoRN(dataset_target)
 
     hist, modeloRN = entrenamientoRN(X_train, Y_train, X_valid, Y_valid)
@@ -181,33 +174,53 @@ for t in nombre:
     Y_valid_normal = scaler.inverse_transform(Y_valid)
     Y_test_normal = scaler.inverse_transform(Y_test)
 
-    t2 = t[7:]
+    #t2 = t[7:]
 
     errores = [mean_absolute_error(Y_valid_normal, Y_hat_valid), mean_absolute_percentage_error(Y_valid_normal, Y_hat_valid)]
     # errores=[mean_absolute_error(Y_train_normal,Y_hat_train), mean_absolute_percentage_error(Y_train_normal,Y_hat_train)]
-    np.save('error_RNN_actual_' + t2 + '.npy', errores) # Cambiar por t2.replace(" ", "")
+    np.save('error_RNN_actual_' + t[5:] + '.npy', errores) # Cambiar por t2.replace(" ", "")
     # modelo = np.load('error_RNN_actual_Yamaha.npy')
 
     # Se guarda el modelo en la misma carpeta del proyecto
-    modeloRN.save('modeloRN_' + t2 + '.h5')
+    modeloRN.save('modeloRN_' + t[5:] + '.h5')
 
 # 2. Modelo Random Forest (RF)
 
 def preprocesamientoRF_XG(dataframe):
     df = dataframe.copy()
     df = df.values
+
     X = df[:, 0: df.shape[1] - 1]
     Y = df[:, df.shape[1] - 1:]
-    X_test = X[X.shape[0] - 4:, :]
-    Y_test = Y[Y.shape[0] - 4:, :].ravel()
-    X = X[: X.shape[0] - 4, :]
-    Y = Y[: Y.shape[0] - 4, :].ravel()
-    X_train, X_valid, Y_train, Y_valid = train_test_split(X, Y, test_size=0.3, random_state=1)
+
+    # min_max_scaler = preprocessing.MinMaxScaler([-1, 1])  # OPORTUNIDAD DE MEJORA 1: Ensayar otros métodos de normalización (o estandarización): Normalizer, StandardScaler, RobustScaler, entre otros.
+    # X_scale = min_max_scaler.fit_transform(X)
+    # Y_scale = min_max_scaler.fit_transform(Y)
+
+    #X_test = X[X.shape[0] - 4:, :]
+    #Y_test = Y[Y.shape[0] - 4:, :].ravel()
+    #X = X[: X.shape[0] - 4, :]
+    #Y = Y[: Y.shape[0] - 4, :].ravel()
+
+    X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.2, shuffle=True, random_state=8)
+    X_train, X_valid, Y_train, Y_valid = train_test_split(X_train, Y_train, test_size=0.25, random_state=8)  # 0.25 x 0.8 = 0.2
+
+    #X_train, X_valid, Y_train, Y_valid = train_test_split(X, Y, test_size=0.3, random_state=1)
     return X_train, X_valid, X_test, Y_train, Y_valid, Y_test
 
-for t in nombre:
+for t in target_list:
+
+    df_aux = df[['FECHA', 'DESEMPLEO', 'INFLACION', 'TRM', 'SMMLV&AUXTTE', 'ICC', 'IEC', 'ICE', 'PRECIO PETROLEO WTI', 'DIAS HABILES', 'FESTIVOS', t]] # , 'RUNT' + t[6:]
+
+    dataset = df_aux.dropna()
+
+    # Se crea una nueva columna con la ponderación de días hábiles entre festivos
+    dataset['DIAS HABILES'] = dataset['DIAS HABILES'] / (dataset['DIAS HABILES'] + dataset['FESTIVOS'])
+    dataset = dataset.drop(['FESTIVOS'], axis=1)
+    dataset.rename(columns={'DIAS HABILES': 'RATIO_DH_F'}, inplace=True)  # La variable RATIO_DH_F tiene estacionalidad ## , 'RUNT' + t[6:]: t
 
     dataset_target = dataset[['DESEMPLEO', 'INFLACION', 'TRM', 'SMMLV&AUXTTE', 'IEC', 'ICE', 'PRECIO PETROLEO WTI', 'RATIO_DH_F', t]]
+
     X_train, X_valid, X_test, Y_train, Y_valid, Y_test = preprocesamientoRF_XG(dataset_target)
 
     # Búsqueda de hiperparámetros
@@ -300,21 +313,31 @@ for t in nombre:
     y_hat_test = modeloRF.predict(X_test)
     y_hat_test = y_hat_test.reshape([-1, 1])
 
-    t2 = t[7:]
+    #t2 = t[7:]
 
     errores = [mean_absolute_error(Y_valid, y_hat_valid), mean_absolute_percentage_error(Y_valid, y_hat_valid)]
     # errores=[mean_absolute_error(Y_train,y_hat_train), mean_absolute_percentage_error(Y_train,y_hat_train)]
-    np.save('error_RF_actual_' + t2 + '.npy', errores)
+    np.save('error_RF_actual_' + t[5:] + '.npy', errores)
     # modelo = np.load('error_RF_actual_Yamaha.npy')
 
     # Se guarda el modelo en la misma carpeta del proyecto
-    joblib.dump(modeloRF, 'modeloRF_' + t2 + '.pkl')
+    joblib.dump(modeloRF, 'modeloRF_' + t[5:] + '.pkl')
 
 # 3. Modelo XGBoost (XG)
 
-for t in nombre:
+for t in target_list:
+
+    df_aux = df[['FECHA', 'DESEMPLEO', 'INFLACION', 'TRM', 'SMMLV&AUXTTE', 'ICC', 'IEC', 'ICE', 'PRECIO PETROLEO WTI', 'DIAS HABILES', 'FESTIVOS', t]] # , 'RUNT' + t[6:]
+
+    dataset = df_aux.dropna()
+
+    # Se crea una nueva columna con la ponderación de días hábiles entre festivos
+    dataset['DIAS HABILES'] = dataset['DIAS HABILES'] / (dataset['DIAS HABILES'] + dataset['FESTIVOS'])
+    dataset = dataset.drop(['FESTIVOS'], axis=1)
+    dataset.rename(columns={'DIAS HABILES': 'RATIO_DH_F'}, inplace=True)  # La variable RATIO_DH_F tiene estacionalidad ## , 'RUNT' + t[6:]: t
 
     dataset_target = dataset[['DESEMPLEO', 'INFLACION', 'TRM', 'SMMLV&AUXTTE', 'IEC', 'ICE', 'PRECIO PETROLEO WTI', 'RATIO_DH_F', t]]
+
     X_train, X_valid, X_test, Y_train, Y_valid, Y_test = preprocesamientoRF_XG(dataset_target)
 
     # Búsqueda de hiperparámetros
@@ -418,21 +441,19 @@ for t in nombre:
     y_hat_test = modeloXG.predict(X_test)
     y_hat_test = y_hat_test.reshape([-1, 1])
 
-    t2 = t[7:]
+    #t2 = t[7:]
 
     errores = [mean_absolute_error(Y_valid, y_hat_valid), mean_absolute_percentage_error(Y_valid, y_hat_valid)]
     # errores=[mean_absolute_error(Y_train,y_hat_train), mean_absolute_percentage_error(Y_train,y_hat_train)]
-    np.save('error_XG_actual_' + t2 + '.npy', errores)
+    np.save('error_XG_actual_' + t[5:] + '.npy', errores)
     # modelo = np.load('error_XG_actual_Yamaha.npy')
 
     # Se guarda el modelo en la misma carpeta del proyecto
-    joblib.dump(modeloXG, 'modeloXG_' + t2 + '.pkl')
+    joblib.dump(modeloXG, 'modeloXG_' + t[5:] + '.pkl')
 
 #########################################################################################################################################################################################
 
 # PARTE B. Entrenamiento con variables rezagadas (t-12): PRONÓSTICO EN LOTE.
-
-# 1. Modelo Redes Neuronales (RN)
 
 def dataset_rezagado(df, t):
     df2 = df.copy()
@@ -449,7 +470,18 @@ def dataset_rezagado(df, t):
     df3 = df3.reset_index(drop=True)
     return df3
 
-for t in nombre:
+# 1. Modelo Redes Neuronales (RN)
+
+for t in target_list:
+
+    df_aux = df[['FECHA', 'DESEMPLEO', 'INFLACION', 'TRM', 'SMMLV&AUXTTE', 'ICC', 'IEC', 'ICE', 'PRECIO PETROLEO WTI', 'DIAS HABILES', 'FESTIVOS', t]] # , 'RUNT' + t[6:]
+
+    dataset = df_aux.dropna()
+
+    # Se crea una nueva columna con la ponderación de días hábiles entre festivos
+    dataset['DIAS HABILES'] = dataset['DIAS HABILES'] / (dataset['DIAS HABILES'] + dataset['FESTIVOS'])
+    dataset = dataset.drop(['FESTIVOS'], axis=1)
+    dataset.rename(columns={'DIAS HABILES': 'RATIO_DH_F'}, inplace=True)  # La variable RATIO_DH_F tiene estacionalidad ## , 'RUNT' + t[6:]: t
 
     dataset_target = dataset[['DESEMPLEO', 'INFLACION', 'TRM', 'SMMLV&AUXTTE', 'IEC', 'ICE', 'PRECIO PETROLEO WTI', 'RATIO_DH_F', t]]
 
@@ -473,22 +505,33 @@ for t in nombre:
     Y_valid_normal = scaler.inverse_transform(Y_valid)
     Y_test_normal = scaler.inverse_transform(Y_test)
 
-    t2 = t[7:]
+    #t2 = t[7:]
 
     errores = [mean_absolute_error(Y_valid_normal, Y_hat_valid), mean_absolute_percentage_error(Y_valid_normal, Y_hat_valid)]
     # errores=[mean_absolute_error(Y_train_normal,Y_hat_train), mean_absolute_percentage_error(Y_train_normal,Y_hat_train)]
-    np.save('error_RNN_rez_' + t2 + '.npy', errores)
+    np.save('error_RNN_rez_' + t[5:] + '.npy', errores)
     # modelo = np.load('error_RN_rez_Yamaha.npy')
 
     # Se guarda el modelo el modelo en la misma carpeta del proyecto
-    modeloRN_r.save('modeloRN_r_' + t2 + '.h5')
+    modeloRN_r.save('modeloRN_r_' + t[5:] + '.h5')
 
 # 2. Modelo Random Forest (RF)
 
-for t in nombre:
+for t in target_list:
+
+    df_aux = df[['FECHA', 'DESEMPLEO', 'INFLACION', 'TRM', 'SMMLV&AUXTTE', 'ICC', 'IEC', 'ICE', 'PRECIO PETROLEO WTI', 'DIAS HABILES', 'FESTIVOS', t]] # 'RUNT' + t[6:]
+
+    dataset = df_aux.dropna()
+
+    # Se crea una nueva columna con la ponderación de días hábiles entre festivos
+    dataset['DIAS HABILES'] = dataset['DIAS HABILES'] / (dataset['DIAS HABILES'] + dataset['FESTIVOS'])
+    dataset = dataset.drop(['FESTIVOS'], axis=1)
+    dataset.rename(columns={'DIAS HABILES': 'RATIO_DH_F'}, inplace=True)  # La variable RATIO_DH_F tiene estacionalidad ## , 'RUNT' + t[6:]: t
 
     dataset_target = dataset[['DESEMPLEO', 'INFLACION', 'TRM', 'SMMLV&AUXTTE', 'IEC', 'ICE', 'PRECIO PETROLEO WTI', 'RATIO_DH_F', t]]
+
     dataset_r = dataset_rezagado(dataset_target, t)
+
     X_train, X_valid, X_test, Y_train, Y_valid, Y_test = preprocesamientoRF_XG(dataset_r)
 
     # Búsqueda de hiperparámetros
@@ -583,25 +626,36 @@ for t in nombre:
     y_hat_test = modeloRF_r.predict(X_test)
     y_hat_test = y_hat_test.reshape([-1, 1])
 
-    t2 = t[7:]
+    #t2 = t[7:]
 
     errores = [mean_absolute_error(Y_valid, y_hat_valid), mean_absolute_percentage_error(Y_valid, y_hat_valid)]
     # errores=[mean_absolute_error(Y_train,y_hat_train), mean_absolute_percentage_error(Y_train,y_hat_train)]
-    np.save('error_RF_rez_' + t2 + '.npy', errores)
-    #modelo = np.load('error_RF_rez_' + t2 + '.npy')
+    np.save('error_RF_rez_' + t[5:] + '.npy', errores)
+    #modelo = np.load('error_RF_rez_' + t[5:] + '.npy')
     # print(modelo[0])
     # print(modelo[1])
 
     # Se guarda el modelo en la misma carpeta del proyecto
-    joblib.dump(modeloRF_r, 'modeloRF_r_' + t2 + '.pkl')
-    # pickle.dump(modeloRF_r, 'modeloRF_r_' + t2 + '.pkl')
+    joblib.dump(modeloRF_r, 'modeloRF_r_' + t[5:] + '.pkl')
+    # pickle.dump(modeloRF_r, 'modeloRF_r_' + t[5:] + '.pkl')
 
 # 3. Modelo XGBoost (XG)
 
-for t in nombre:
+for t in target_list:
+
+    df_aux = df[['FECHA', 'DESEMPLEO', 'INFLACION', 'TRM', 'SMMLV&AUXTTE', 'ICC', 'IEC', 'ICE', 'PRECIO PETROLEO WTI', 'DIAS HABILES', 'FESTIVOS', t]] # 'RUNT' + t[6:]
+
+    dataset = df_aux.dropna()
+
+    # Se crea una nueva columna con la ponderación de días hábiles entre festivos
+    dataset['DIAS HABILES'] = dataset['DIAS HABILES'] / (dataset['DIAS HABILES'] + dataset['FESTIVOS'])
+    dataset = dataset.drop(['FESTIVOS'], axis=1)
+    dataset.rename(columns={'DIAS HABILES': 'RATIO_DH_F'}, inplace=True)  # La variable RATIO_DH_F tiene estacionalidad ## , 'RUNT' + t[6:]: t
 
     dataset_target = dataset[['DESEMPLEO', 'INFLACION', 'TRM', 'SMMLV&AUXTTE', 'IEC', 'ICE', 'PRECIO PETROLEO WTI', 'RATIO_DH_F', t]]
+
     dataset_r = dataset_rezagado(dataset_target, t)
+
     X_train, X_valid, X_test, Y_train, Y_valid, Y_test = preprocesamientoRF_XG(dataset_r)
 
     # Búsqueda de hiperparámetros
@@ -711,14 +765,14 @@ for t in nombre:
     y_hat_test = modeloXG_r.predict(X_test)
     y_hat_test = y_hat_test.reshape([-1, 1])
 
-    t2 = t[7:]
+    #t2 = t[7:]
 
     errores = [mean_absolute_error(Y_valid, y_hat_valid), mean_absolute_percentage_error(Y_valid, y_hat_valid)]
     # errores=[mean_absolute_error(Y_train,y_hat_train), mean_absolute_percentage_error(Y_train,y_hat_train)]
-    np.save('error_XG_rez_' + t2 + '.npy', errores)
+    np.save('error_XG_rez_' + t[5:] + '.npy', errores)
     # modelo = np.load('error_XG_rez_Yamaha.npy')
     # print(modelo[0])
     # print(modelo[1])
 
     # Se guarda el modelo en la misma carpeta del proyecto
-    joblib.dump(modeloXG_r, 'modeloXG_r_' + t2 + '.pkl')
+    joblib.dump(modeloXG_r, 'modeloXG_r_' + t[5:] + '.pkl')
