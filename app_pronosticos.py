@@ -28,13 +28,13 @@ st.set_page_config(
 )
 
 # Se importa el dataframe
-df_runt_total = pd.read_excel('BD_Actualizada_Feb2023.xlsx', sheet_name='RUNT_Total', converters={'TRM': int, 'SMMLV&AUXTTE': int, 'DIAS HABILES': int, 'FESTIVOS': int, 'RUNT MERCADO': int, 'RUNT YAMAHA': int}) #***
-#df_runt_categoria_yamaha = pd.read_excel('BD_Actualizada_Feb2023.xlsx', sheet_name='RUNT_Categoria_Yamaha') #***
-df_runt_modelo_yamaha = pd.read_excel('BD_Actualizada_Feb2023.xlsx', sheet_name='RUNT_Modelo_Yamaha', converters={'TRM': int, 'SMMLV&AUXTTE': int, 'DIAS HABILES': int, 'FESTIVOS': int, 'RUNT MERCADO': int, 'RUNT YAMAHA': int,
+df_runt_total = pd.read_excel('BD_Actualizada.xlsx', sheet_name='RUNT_Total', converters={'TRM': int, 'SMMLV&AUXTTE': int, 'DIAS HABILES': int, 'FESTIVOS': int, 'RUNT MERCADO': int, 'RUNT YAMAHA': int}) #***
+#df_runt_categoria_yamaha = pd.read_excel('BD_Actualizada.xlsx', sheet_name='RUNT_Categoria_Yamaha') #***
+df_runt_modelo_yamaha = pd.read_excel('BD_Actualizada.xlsx', sheet_name='RUNT_Modelo_Yamaha', converters={'TRM': int, 'SMMLV&AUXTTE': int, 'DIAS HABILES': int, 'FESTIVOS': int, 'RUNT MERCADO': int, 'RUNT YAMAHA': int,
                                       'RUNT NMAX': int, 'RUNT NMAX CONNECTED': int, 'RUNT CRYPTON FI': int, 'RUNT XTZ125': int, 'RUNT XTZ150': int, 'RUNT XTZ250': int, 'RUNT MT03': int, 'RUNT FZ25': int, 'RUNT FZ15': int,
                                       'RUNT SZ15RR': int, 'RUNT YBRZ125': int, 'RUNT YCZ110': int, 'RUNT XMAX': int}) #***
-#df_runt_marca_mercado = pd.read_excel('BD_Actualizada_Feb2023.xlsx', sheet_name='RUNT_Marca_Mercado') #***
-#df_runt_categoria_mercado = pd.read_excel('BD_Actualizada_Feb2023.xlsx', sheet_name='RUNT_Categoria_Mercado') #***
+#df_runt_marca_mercado = pd.read_excel('BD_Actualizada.xlsx', sheet_name='RUNT_Marca_Mercado') #***
+#df_runt_categoria_mercado = pd.read_excel('BD_Actualizada.xlsx', sheet_name='RUNT_Categoria_Mercado') #***
 
 # La siguiente función de escalamiento es transversal a todos los pronósticos que se deriven de redes neuronales:
 def preprocesamientoRN(df):
@@ -1085,7 +1085,7 @@ def HoltWinters(variable):
     MES = int(MES)
 
     # Se carga el dataset original y se realizan sobre él algunas funciones básicas de limpieza
-    df = pd.read_excel('BD_Actualizada_Feb2023.xlsx', sheet_name="RUNT_Total")
+    df = pd.read_excel('BD_Actualizada.xlsx', sheet_name="RUNT_Total")
     df3 = df.copy()
     df3 = df3.reset_index(drop=True)
     df3.set_index('FECHA', inplace=True)
@@ -1103,7 +1103,7 @@ def HoltWinters(variable):
     MES = int(MES)
 
     # Se carga el dataset original y se realizan sobre él algunas funciones básicas de limpieza
-    df = pd.read_excel('BD_Actualizada_Feb2023.xlsx', sheet_name="RUNT_Total")
+    df = pd.read_excel('BD_Actualizada.xlsx', sheet_name="RUNT_Total")
     df3 = df.copy()
     df3 = df3.reset_index(drop=True)
     df3.set_index('FECHA', inplace=True)

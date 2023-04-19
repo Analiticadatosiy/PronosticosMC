@@ -106,7 +106,7 @@ def MAPE(Y_actual, Y_Predicted):
     return mape
 
 # Se importan los datos por única vez
-df = pd.read_excel('BD_Actualizada_Feb2023.xlsx', sheet_name='RUNT_Modelo_Yamaha', converters={'TRM': int, 'SMMLV&AUXTTE': int, 'DIAS HABILES': int, 'FESTIVOS': int, 'RUNT MERCADO': int, 'RUNT YAMAHA': int, 'RUNT NMAX': int, 'RUNT NMAX CONNECTED': int, 'RUNT CRYPTON FI': int, 'RUNT XTZ125': int, 'RUNT XTZ150': int, 'RUNT XTZ250': int, 'RUNT MT03': int, 'RUNT FZ25': int, 'RUNT FZ15': int, 'RUNT SZ15RR': int, 'RUNT YBRZ125': int, 'RUNT YCZ110': int, 'RUNT XMAX': int})
+df = pd.read_excel('BD_Actualizada.xlsx', sheet_name='RUNT_Modelo_Yamaha', converters={'TRM': int, 'SMMLV&AUXTTE': int, 'DIAS HABILES': int, 'FESTIVOS': int, 'RUNT MERCADO': int, 'RUNT YAMAHA': int, 'RUNT NMAX': int, 'RUNT NMAX CONNECTED': int, 'RUNT CRYPTON FI': int, 'RUNT XTZ125': int, 'RUNT XTZ150': int, 'RUNT XTZ250': int, 'RUNT MT03': int, 'RUNT FZ25': int, 'RUNT FZ15': int, 'RUNT SZ15RR': int, 'RUNT YBRZ125': int, 'RUNT YCZ110': int, 'RUNT XMAX': int})
 
 target_list = ['RUNT MERCADO', 'RUNT YAMAHA', 'RUNT NMAX', 'RUNT NMAX CONNECTED', 'RUNT CRYPTON FI', 'RUNT XTZ125', 'RUNT XTZ150', 'RUNT XTZ250', 'RUNT MT03', 'RUNT FZ25', 'RUNT FZ15', 'RUNT SZ15RR', 'RUNT YBRZ125', 'RUNT YCZ110', 'RUNT XMAX']
 
