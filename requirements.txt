@@ -1,6 +1,6 @@
 pandas==1.4.2
 matplotlib==3.5.1
-tensorflow==2.8.0
+tensorflow
 seaborn==0.11.2
 pingouin==0.5.1
 openpyxl==3.0.9
