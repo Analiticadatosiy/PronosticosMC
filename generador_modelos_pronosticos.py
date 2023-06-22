@@ -123,7 +123,7 @@ def preprocesamientoRN(dataframe):
     X = df[:, 0: df.shape[1] - 1]
     Y = df[:, df.shape[1] - 1:]
 
-    min_max_scaler = preprocessing.MinMaxScaler([-1, 1])
+    min_max_scaler = preprocessing.MinMaxScaler((-1, 1))
     X_scale = min_max_scaler.fit_transform(X)
     Y_scale = min_max_scaler.fit_transform(Y)
 
@@ -193,7 +193,7 @@ def preprocesamientoRF_XG(dataframe):
     X = df[:, 0: df.shape[1] - 1]
     Y = df[:, df.shape[1] - 1:]
 
-    # min_max_scaler = preprocessing.MinMaxScaler([-1, 1])  # OPORTUNIDAD DE MEJORA 1: Ensayar otros métodos de normalización (o estandarización): Normalizer, StandardScaler, RobustScaler, entre otros.
+    # min_max_scaler = preprocessing.MinMaxScaler((-1, 1))  # OPORTUNIDAD DE MEJORA 1: Ensayar otros métodos de normalización (o estandarización): Normalizer, StandardScaler, RobustScaler, entre otros.
     # X_scale = min_max_scaler.fit_transform(X)
     # Y_scale = min_max_scaler.fit_transform(Y)
 

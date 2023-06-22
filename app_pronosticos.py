@@ -43,7 +43,7 @@ def preprocesamientoRN(df):
   Y = df.iloc[:, df.shape[1]-1:]
   #X = df[:, 0: df.shape[1]-1]
   #Y = df[:, df.shape[1]-1:]
-  min_max_scaler = preprocessing.MinMaxScaler([-1, 1]) # OPORTUNIDAD DE MEJORA 1: Ensayar otros métodos de normalización (o estandarización): Normalizer, StandardScaler, RobustScaler, entre otros.
+  min_max_scaler = preprocessing.MinMaxScaler((-1, 1)) # OPORTUNIDAD DE MEJORA 1: Ensayar otros métodos de normalización (o estandarización): Normalizer, StandardScaler, RobustScaler, entre otros.
   X_scale = min_max_scaler.fit_transform(X)
   Y_scale = min_max_scaler.fit_transform(Y)
   return min_max_scaler, X_scale, Y_scale
@@ -149,13 +149,13 @@ def actual_individual(selectbox1, selectbox4): # Predicción de un sólo mes. Es
       # Se agrega una nueva fila al arreglo numpy1 con los valores de las variables que ingresó el usuario por teclado.
       X = np.array([[DESEMPLEO, INFLACION, TRM, SMMLV_AUXTTE, IEC, ICE, PRECIO_PETROLEO_WTI, (DIAS_HABILES)/(DIAS_HABILES+FESTIVOS)]])
       # Se asigna un valor semilla (igual a 8000) a la variable RUNT YAMAHA.
-      X_RN = np.concatenate([numpy1, np.reshape(np.append(X, [8000]), [1, -1])]) # (1, -1) #AJUSTAR ESTE VALOR SEMILLA
+      X_RN = np.concatenate([numpy1, np.reshape(np.append(X, [8000]), (1, -1))]) # (1, -1) #AJUSTAR ESTE VALOR SEMILLA
 
       # Redes Neuronales
       # Se escalan los datos con la función preprocesamientoRN que fue definida en las primeras líneas de código
       scaler, X_scale, Y_scale = preprocesamientoRN(X_RN)
       # Se almacena, en la nueva variable y_hat_scale, el valor predicho (por el modelo de redes neuronales) para RUNT YAMAHA, escalado entre -1 y 1.
-      y_hat_scale = modeloRN.predict(np.reshape(X_scale[-1], [1, -1])) # (1, -1)
+      y_hat_scale = modeloRN.predict(np.reshape(X_scale[-1], (1, -1))) # (1, -1)
       # Se regresa a la escala original el valor predicho para RUNT YAMAHA
       y_hat_RN = scaler.inverse_transform(y_hat_scale).ravel()
 
@@ -244,13 +244,13 @@ def actual_individual(selectbox1, selectbox4): # Predicción de un sólo mes. Es
       # Se agrega una nueva fila al arreglo numpy1 con los valores de las variables que ingresó el usuario por teclado.
       X = np.array([[DESEMPLEO, INFLACION, TRM, SMMLV_AUXTTE, IEC, ICE, PRECIO_PETROLEO_WTI, (DIAS_HABILES) / (DIAS_HABILES + FESTIVOS)]])
       # Se asigna un valor semilla (igual a 40000) a la variable RUNT MERCADO.
-      X_RN = np.concatenate([numpy1, np.reshape(np.append(X, [40000]), [1, -1])])  # (1, -1) # OJO: NO ME CUADRA ESTE DATO
+      X_RN = np.concatenate([numpy1, np.reshape(np.append(X, [40000]), (1, -1))])  # (1, -1) # OJO: NO ME CUADRA ESTE DATO
 
       # Redes Neuronales
       # Se escalan los datos con la función preprocesamientoRN que fue definida en las primeras líneas de código
       scaler, X_scale, Y_scale = preprocesamientoRN(X_RN)
       # Se almacena, en la nueva variable y_hat_scale, el valor predicho (por el modelo de redes neuronales) para RUNT YAMAHA/MERCADO, escalado entre -1 y 1.
-      y_hat_scale = modeloRN.predict(np.reshape(X_scale[-1], [-1, 1]))
+      y_hat_scale = modeloRN.predict(np.reshape(X_scale[-1], (1, -1))) # (1, -1)
       # Se regresa a la escala original el valor predicho para RUNT YAMAHA
       y_hat_RN = scaler.inverse_transform(y_hat_scale).ravel()
 
@@ -622,14 +622,14 @@ def rezago_yamaha(): # Predicción de un solo mes
       # Se agrega una nueva fila al arreglo numpy1 con los valores de las variables que ingresó el usuario por teclado.
       X = np.array([[DESEMPLEO, INFLACION, TRM, SMMLV_AUXTTE, PRECIO_PETROLEO_WTI, (DIAS_HABILES)/(DIAS_HABILES+FESTIVOS), RUNT_MERCADO]])
       # Se asigna un valor semilla (igual a 8000) a la variable RUNT YAMAHA.
-      #X_RN = np.concatenate([numpy1, np.reshape(np.append(X, [8000]), [1, -1])]) # (1, -1)
-      X_RN = np.array([[DESEMPLEO, INFLACION, TRM, SMMLV_AUXTTE, PRECIO_PETROLEO_WTI, (DIAS_HABILES) / (DIAS_HABILES + FESTIVOS), RUNT_MERCADO, np.reshape(8000, [1, -1])]]) # (1, -1)
+      #X_RN = np.concatenate([numpy1, np.reshape(np.append(X, [8000]), (1, -1))]) # (1, -1)
+      X_RN = np.array([[DESEMPLEO, INFLACION, TRM, SMMLV_AUXTTE, PRECIO_PETROLEO_WTI, (DIAS_HABILES) / (DIAS_HABILES + FESTIVOS), RUNT_MERCADO, np.reshape(8000, (1, -1))]]) # (1, -1)
 
       # Redes Neuronales
       # Se escalan los datos con la función preprocesamientoRN que fue definida en las primeras líneas de código
       scaler, X_scale, Y_scale = preprocesamientoRN(X_RN)
       # Se almacena, en la nueva variable y_hat_scale, el valor predicho para RUNT YAMAHA
-      y_hat_scale = modeloRN_r_yamaha.predict(np.reshape(X_scale[-1], [1, -1])) # (1, -1)
+      y_hat_scale = modeloRN_r_yamaha.predict(np.reshape(X_scale[-1], (1, -1))) # (1, -1)
       # Se regresa a la escala original el valor predicho para RUNT YAMAHA
       y_hat_RN = scaler.inverse_transform(y_hat_scale).ravel()
 
@@ -860,13 +860,13 @@ def rezago_mercado(): # Predicción de un solo mes
       X = np.array([[DESEMPLEO, INFLACION, TRM, SMMLV_AUXTTE, PRECIO_PETROLEO_WTI, (DIAS_HABILES) / (DIAS_HABILES + FESTIVOS), RUNT_MERCADO]])
       #st.write(X)
       # # Se asigna un valor semilla (igual a 40000) a la variable RUNT MERCADO.
-      X_RN = np.concatenate([numpy1, np.reshape(np.append(X, [40000]), [1, -1])]) # (1, -1)
+      X_RN = np.concatenate([numpy1, np.reshape(np.append(X, [40000]), (1, -1))]) # (1, -1)
 
       # Redes Neuronales
       # Se escalan los datos con la función preprocesamientoRN que fue definida en las primeras líneas de código
       scaler, X_scale, Y_scale = preprocesamientoRN(X_RN)
       # Se almacena, en la nueva variable y_hat_scale, el valor predicho para RUNT MERCADO
-      y_hat_scale = modeloRN_r_mercado.predict(np.reshape(X_scale[-1], [1, -1])) # (1, -1)
+      y_hat_scale = modeloRN_r_mercado.predict(np.reshape(X_scale[-1], (1, -1))) # (1, -1)
       # Se regresa a la escala original el valor predicho para RUNT YAMAHA
       y_hat_RN = scaler.inverse_transform(y_hat_scale).ravel()
 
@@ -1684,14 +1684,14 @@ else:
             # Se agrega una nueva fila al arreglo numpy1 con los valores de las variables que ingresó el usuario por teclado.
             X = np.array([[DESEMPLEO, INFLACION, TRM, SMMLV_AUXTTE, IEC, ICE, PRECIO_PETROLEO_WTI, (DIAS_HABILES) / (DIAS_HABILES + FESTIVOS)]])
             # Se asigna un valor semilla (igual a 10) a la variable modelo; este valor se puede cambiar por el mínimo (o a la media) del Runt de/para cada modelo.
-            # X_RN = np.concatenate([numpy1, np.reshape(np.append(X, [10]), [1, -1])]) # (1, -1)
-            X_RN = np.array([[DESEMPLEO, INFLACION, TRM, SMMLV_AUXTTE, IEC, ICE, PRECIO_PETROLEO_WTI, (DIAS_HABILES) / (DIAS_HABILES + FESTIVOS), np.reshape(10, [1, -1])]]) # (1, -1)
+            # X_RN = np.concatenate([numpy1, np.reshape(np.append(X, [10]), (1, -1))]) # (1, -1)
+            X_RN = np.array([[DESEMPLEO, INFLACION, TRM, SMMLV_AUXTTE, IEC, ICE, PRECIO_PETROLEO_WTI, (DIAS_HABILES) / (DIAS_HABILES + FESTIVOS), np.reshape(10, (1, -1))]]) # (1, -1)
 
             # Redes Neuronales
             # Se escalan los datos con la función preprocesamientoRN que fue definida en las primeras líneas de código
             scaler, X_scale, Y_scale = preprocesamientoRN(X_RN)
             # Se almacena, en la nueva variable y_hat_scale, el valor predicho (por el modelo de redes neuronales) para RUNT YAMAHA, escalado entre -1 y 1.
-            y_hat_scale = modeloRN.predict(np.reshape(X_scale[-1], [1, -1])) # (1, -1)
+            y_hat_scale = modeloRN.predict(np.reshape(X_scale[-1], (1, -1))) # (1, -1)
             # Se regresa a la escala original el valor predicho para RUNT YAMAHA
             y_hat_RN = scaler.inverse_transform(y_hat_scale).ravel()
 
@@ -1935,13 +1935,13 @@ else:
             # Se agrega una nueva fila al arreglo numpy1 con los valores de las variables que ingresó el usuario por teclado.
             X = np.array([[DESEMPLEO, INFLACION, TRM, SMMLV_AUXTTE, PRECIO_PETROLEO_WTI, (DIAS_HABILES) / (DIAS_HABILES + FESTIVOS), RUNT_MERCADO]])
             # Se asigna un valor semilla (igual a 10) para cada uno de los modelos YAMAHA.
-            X_RN = np.array([[DESEMPLEO, INFLACION, TRM, SMMLV_AUXTTE, PRECIO_PETROLEO_WTI, (DIAS_HABILES) / (DIAS_HABILES + FESTIVOS), RUNT_MERCADO, np.reshape(10, [1, -1])]]) # (1, -1)
+            X_RN = np.array([[DESEMPLEO, INFLACION, TRM, SMMLV_AUXTTE, PRECIO_PETROLEO_WTI, (DIAS_HABILES) / (DIAS_HABILES + FESTIVOS), RUNT_MERCADO, np.reshape(10, (1, -1))]]) # (1, -1)
 
             # Redes Neuronales
             # Se escalan los datos con la función preprocesamientoRN que fue definida en las primeras líneas de código
             scaler, X_scale, Y_scale = preprocesamientoRN(X_RN)
             # Se almacena, en la nueva variable y_hat_scale, el valor predicho para RUNT YAMAHA
-            y_hat_scale = modeloRN_r_yamaha.predict(np.reshape(X_scale[-1], [1, -1])) # (1, -1)
+            y_hat_scale = modeloRN_r_yamaha.predict(np.reshape(X_scale[-1], (1, -1))) # (1, -1)
             # Se regresa a la escala original el valor predicho para RUNT YAMAHA
             y_hat_RN = scaler.inverse_transform(y_hat_scale).ravel()
 
